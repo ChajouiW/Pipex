@@ -6,7 +6,7 @@
 /*   By: mochajou <mochajou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 16:12:12 by mochajou          #+#    #+#             */
-/*   Updated: 2024/11/23 20:40:13 by mochajou         ###   ########.fr       */
+/*   Updated: 2025/01/28 18:57:48 by mochajou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,24 +16,10 @@
 # include <unistd.h>
 # include <stdarg.h>
 
-typedef struct s_flags
-{
-	char	sp;
-	int		plus;
-	int		hash;
-	int		space;
-}	t_f;
-
-int	flag_handle(va_list ap, t_f flag);
-int	flaged(const char sp, t_f flag);
-
-int	ft_printf(const char *s, ...);
-int	handle_format(char sp, va_list ap);
-int	print_char(const char c);
-int	print_str(const char *s);
-int	print_nbr(int n);
-int	print_unsigned(unsigned int n);
-int	print_hex(unsigned long n, char x);
-int	print_ptr(unsigned long n);
+void	ft_printf(const char *s, ...);
+//static void	handle_format(char sp, va_list ap);
+//static void	print_char(const char c);
+//static void	print_str(const char *s);
+//static void	print_nbr(int n);
 
 #endif

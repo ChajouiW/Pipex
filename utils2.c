@@ -6,7 +6,7 @@
 /*   By: mochajou <mochajou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/25 20:51:25 by mochajou          #+#    #+#             */
-/*   Updated: 2025/01/25 20:53:00 by mochajou         ###   ########.fr       */
+/*   Updated: 2025/01/29 00:42:43 by mochajou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,16 +62,37 @@ size_t	ft_strlen(const char *s)
 	return (i);
 }
 
+void	ft_error(char *cmd, t_all a, char **s, int n)
+{
+	if (n == -1)
+	{
+		ft_printf("permission denied: %s\n", cmd);
+		ft_freee(a.s_path);
+		while (wait(NULL) > 0)
+			;
+		exit(1);
+	}
+	ft_freee(s);
+	if (n || !*cmd)
+	{
+		ft_printf("permission denied: %s\n", cmd);
+		ft_freee(a.s_path);
+		exit(126);
+	}
+	ft_printf("command not found: %s\n", cmd);
+	ft_freee(a.s_path);
+	exit(127);
+}
+
 char	*ft_strjoin(char const *s1, char const *s2)
 {
 	char	*new;
 	size_t	i;
 	size_t	j;
 
-	if (!s1 || !s2 || !*s2)
+	if (!s1 || !s2)
 		return (NULL);
-	i = ft_strlen(s1) + ft_strlen(s2) + 1;
-	new = (char *)malloc(sizeof(char) * (i + 1));
+	new = (char *)calloc(sizeof(char), (ft_strlen(s1) + ft_strlen(s2) + 2));
 	if (!new)
 		return (NULL);
 	i = 0;

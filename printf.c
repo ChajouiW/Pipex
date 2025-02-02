@@ -6,7 +6,7 @@
 /*   By: mochajou <mochajou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 18:29:41 by mochajou          #+#    #+#             */
-/*   Updated: 2025/01/29 00:44:08 by mochajou         ###   ########.fr       */
+/*   Updated: 2025/02/01 00:57:27 by mochajou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 static void	print_char(const char c)
 {
-	(write(1, &c, 1));
+	write(2, &c, 1);
 }
 
 static void	print_str(const char *s)

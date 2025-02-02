@@ -6,66 +6,101 @@
 /*   By: mochajou <mochajou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/27 14:44:06 by mochajou          #+#    #+#             */
-/*   Updated: 2025/01/28 23:57:58 by mochajou         ###   ########.fr       */
+/*   Updated: 2025/02/01 16:10:00 by mochajou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	ft_close(int fd1, int fd2)
+char	*fill_content(char *s)
 {
-	close(fd1);
-	close(fd2);
+	int		len;
+	char	*tmp;
+	char	*content;
+	char	*save;
+
+	content = NULL;
+	len = ft_strlen(s);
+	tmp = get_next_line(0);
+	while (tmp && !ft_strnstr(tmp, s, len))
+	{
+		save = content;
+		if (!content)
+			content = ft_strdup(tmp);
+		else
+			content = ft_strjoin(content, tmp);
+		free(save);
+		free(tmp);
+		ft_printf("here_doc> ");
+		tmp = get_next_line(0);
+	}
+	free(tmp);
+	free(s);
+	return (content);
 }
 
-void	execute(t_all a, char *arg, int fd, int *pid)
+void	set_myav(t_all a, char **av)
 {
-	char	**cmd;
+	int	i;
+	int	j;
 
-	*pid = fork();
-	if (*pid == 0)
+	i = 0;
+	j = 1;
+	while (i < a.ac - 1)
 	{
-		cmd = cmd_path(arg, a);
-		if (!cmd)
-			ft_error(arg, a, cmd, 0);
-		dup2(a.fdout, 1);
-		dup2(a.fdin, 0);
-		ft_close(a.fdout, a.fdin);
-		close(fd);
-		execve(cmd[0], cmd, a.envp);
-		ft_freee(cmd);
-		ft_freee(a.s_path);
-		exit(-1);
+		if (i == 1)
+			a.my_av[i] = ft_strdup("/tmp/tmp_file");
+		else
+			a.my_av[i] = ft_strdup(av[j]);
+		i++;
+		j++;
+	}
+	a.my_av[i] = NULL;
+}
+
+void	ft_remove(char *file, t_all a)
+{
+	pid_t	pid;
+	char	*cmd;
+	char	**path;
+
+	pid = fork();
+	if (pid == 0)
+	{
+		cmd = "rm -f ";
+		cmd = ft_strjoin(cmd, file);
+		path = cmd_path(cmd, a);
+		execve(path[0], path, a.envp);
+		free(cmd);
+		ft_free(path, 0);
 	}
 	else
-		ft_close(a.fdout, a.fdin);
+		waitpid(pid, NULL, 0);
 }
 
-void	pipex(t_all a, char **av, int *status)
+void	here_doc(t_all a, char **av, int *status)
 {
-	int	t[2];
-	int	i;
-	int	pid;
+	char	*file_content;
 
-	i = 2;
-	a.fdin = check_files(av[1], 0);
-	if (a.fdin < 0)
-		a.fdin = open("/dev/null", O_RDONLY);
-	while (i < a.ac - 2)
+	if (a.ac < 6)
 	{
-		pipe(t);
-		a.fdout = t[1];
-		execute(a, av[i], t[0], &pid);
-		a.fdin = t[0];
-		i++;
+		ft_free(a.s_path, 0);
+		usage(3);
 	}
-	a.fdout = check_files(av[a.ac - 1], 1);
-	if (a.fdout < 0)
-		ft_error(av[a.ac - 1], a, NULL, -1);
-	execute(a, av[i], t[0], &pid);
-	waitpid(pid, status, 0);
-	while (wait(NULL) > 0)
-		;
+	a.my_av = (char **)malloc(sizeof(char *) * a.ac);
+	if (!a.my_av)
+		return ;
+	set_myav(a, av);
+	(1) && (a.ac = a.ac - 1, a.b = 1);
+	if (access(a.my_av[1], W_OK) == -1)
+		ft_remove(a.my_av[1], a);
+	ft_printf("here_doc> ");
+	a.fdout = open(a.my_av[1], O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	file_content = fill_content(ft_strjoin(av[2], "\n"));
+	if (file_content)
+		write(a.fdout, file_content, ft_strlen(file_content));
+	(close(a.fdout), free(file_content));
+	(pipex(a, a.my_av, status), ft_remove(a.my_av[1], a), ft_free(a.my_av, 0));
 }
 
 int	main(int ac, char **av, char **env)
@@ -73,16 +108,16 @@ int	main(int ac, char **av, char **env)
 	t_all	needed;
 	int		status;
 
-	status = 0;
 	if (ac < 5)
-	{
-		ft_printf("Invalid argument try: ./pipex file1 cmd1 cmd2 file2\n");
-		exit(1);
-	}
+		usage(2);
+	needed.b = 0;
 	needed.ac = ac;
 	needed.envp = env;
-	needed.s_path = ft_split(env_path(env), ':');
-	pipex(needed, av, &status);
-	ft_freee(needed.s_path);
+	needed.s_path = ft_split_cmd(env_path(env), ':');
+	if (!ft_strncmp(av[1], "here_doc", 9))
+		here_doc(needed, av, &status);
+	else
+		pipex(needed, av, &status);
+	ft_free(needed.s_path, 0);
 	exit(WEXITSTATUS(status));
 }
